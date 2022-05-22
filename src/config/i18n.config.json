@@ -1,0 +1,9 @@
+{
+  "matchOpts": [
+    "src/**/*.{js,ts,tsx,jsx}",
+    { "ignore": ["**/node_modules/**"] }
+  ],
+  "localesDir": "./locales",
+  "cnJsonFileName": "zh-cn.json",
+  "translateLan": ["zh-TW"]
+}
