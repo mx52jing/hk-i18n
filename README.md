@@ -47,9 +47,11 @@ npx hk-i18n init
 - cnJsonFileName(string)
   要保存的中文JSON文件名称
 
-- translateLan(Array<string>)
+- translateLan(Array\<string>)
   要将中文翻译成哪几种语言,参考[languages](https://github.com/vitalets/google-translate-api/blob/master/languages.js)
 
+- excelDir(string)
+  生成excel的目录
 
 ## 收集中文和生成其他语言文件
 

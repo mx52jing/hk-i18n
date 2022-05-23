@@ -126,7 +126,6 @@ export const normalizePath = (path: string) => {
 }
 
 //获取文件名
-
 export const getFileName = (name: string) => {
   const basename = path.basename(name);
   return basename.substring(0, basename.lastIndexOf('.'));
