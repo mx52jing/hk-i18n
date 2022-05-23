@@ -61,7 +61,7 @@ const babelPluginReplace = async ({ types: t }: any) => {
           return;
         }
         const parent = path.parent;
-        const newAst = makeTranslateStatament(t, key, newVal, state.importedName);
+        const newAst = makeTranslateStatament({ t, key, cnText: newVal, importedName: state.importedName });
         let newNode;
         switch(parent.type) {
           case 'JSXAttribute': // <A title="中文" />
@@ -94,7 +94,7 @@ const babelPluginReplace = async ({ types: t }: any) => {
           path.skip();
           return;
         }
-        const newAst = makeTranslateStatament(t, key, newVal, state.importedName);
+        const newAst = makeTranslateStatament({ t, key, cnText: newVal, importedName: state.importedName });
         path.replaceWith(
           t.jsxExpressionContainer(newAst)
         )
@@ -116,7 +116,7 @@ const babelPluginReplace = async ({ types: t }: any) => {
             const newVal = removeTextSpace(value);
             const key = lanMap.get(newVal);
             if(!key) return;
-            expressions.splice(index + idx, 0, makeTranslateStatament(t, key, newVal, state.importedName));
+            expressions.splice(index + idx, 0, makeTranslateStatament({ t, key, cnText: newVal, importedName: state.importedName }));
             idx++;
             // 每增添一个表达式都需要变化原始节点,并新增下一个字符节点
             item.value = { raw: '', cooked: '' };

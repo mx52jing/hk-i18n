@@ -4,7 +4,7 @@ import {
   lanId,
   upDataLanId,
 } from '../utils/tool';
-import { skipCurrentStep } from '../utils/babelUtils';
+import { skipCurrentStep, isDisabledI18n } from '../utils/babelUtils';
 
 const babelPluginCollect = async () => {
   return {
@@ -27,6 +27,10 @@ const babelPluginCollect = async () => {
       TemplateLiteral(path: any, state: any) {
         // 收集模版字符串中的中文
         const { node } = path;
+        if(isDisabledI18n(node)) {
+          path.skip();
+          return;
+        }
         const { quasis } = node;
         const chineses = quasis.reduce((memo: Array<string>, cur: any) => {
           const val = cur.value.raw;

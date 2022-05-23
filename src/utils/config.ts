@@ -3,11 +3,12 @@ import fse from 'fs-extra';
 import chalk from "chalk";
 import ora from 'ora';
 import defaultConfig from '../config/i18n.config.json'
+import { normalizePath } from './tool';
 
 import type { IOptions } from 'glob';
 
 const spinner = ora();
-export const configPath = path.resolve('i18n.config.json');
+export const configPath = normalizePath(path.resolve('i18n.config.json'));
 export interface IConfig {
   matchOpts: [
     string,
@@ -15,7 +16,8 @@ export interface IConfig {
   ],
   localesDir: string,
   cnJsonFileName: string
-  translateLan: Array<string>
+  translateLan: Array<string>;
+  excelDir: string;
 }
 
 let cacheConfig: IConfig;

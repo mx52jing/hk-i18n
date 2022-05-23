@@ -1,12 +1,13 @@
-#! /usr/bin/env node
+#!/usr/bin/env node
 import path from 'node:path';
 import ora from 'ora';
 import fse from 'fs-extra';
 import chalk from 'chalk';
+import prettier from 'prettier'
 import { transformFileAsync } from '@babel/core';
 import babelPluginReplace from '../plugins/babel-plugin-replace';
 import { getConfig } from "../utils/config";
-import { judgeChinese, collectTranslateFiles, genLanMap } from '../utils/tool';
+import { judgeChinese, collectTranslateFiles, genLanMap, normalizePath } from '../utils/tool';
 
 import type { ILanJSON } from '../utils/tool';
 
@@ -18,7 +19,7 @@ const spinner = ora();
     localesDir,
     cnJsonFileName,
   } = await getConfig();
-  const cnJsonPath = path.resolve(localesDir, cnJsonFileName);
+  const cnJsonPath = normalizePath(path.resolve(localesDir, cnJsonFileName));
   const isCnJsonExist = await fse.pathExists(cnJsonPath);
   if (!isCnJsonExist) {
     spinner.fail(chalk.red('Error：未找到中文json文件，请先生成中文json文件或检查中文json配置路径是否正确'));
@@ -35,7 +36,7 @@ const spinner = ora();
   // 读取中JSON的数据
   const jsonData: ILanJSON = await fse.readJSON(cnJsonPath);
   // 通过中问JSON生成Map => { 中文: "该中文的key" }
-  const { lanMap } = genLanMap(jsonData);
+  const { lanMap } = genLanMap(jsonData, false);
   const transformOptions = {
     presets: [
       ["@babel/preset-typescript", { onlyRemoveTypeImports: true }]
@@ -51,7 +52,8 @@ const spinner = ora();
     if (!judgeChinese(code)) return;
     const res = await transformFileAsync(file, transformOptions);
     if(!res?.code) return;
-    await fse.outputFile(file, res.code)
+    const formatCode = prettier.format(res.code, { parser: 'babel' })
+    await fse.outputFile(file, formatCode)
     spinner.succeed(`[${chalk.green(file)}]`);
     if(idx++ === len) {
       spinner.succeed(chalk.green('所有文件中文均已替换完毕，程序结束'));

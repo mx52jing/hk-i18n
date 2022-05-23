@@ -1,12 +1,10 @@
 import path from 'path';
 import glob from 'glob';
-import ora from 'ora';
 import chalk from 'chalk';
 import fse from 'fs-extra'
 
 import type { IOptions } from 'glob';
 import type { WriteOptions } from 'fs-extra';
-const spinner = ora();
 // 判断文件是否包含非注释中文
 export const chineseReg = /(?<!\/\/\s*.*)(?<!\/\*+.*)[\u4e00-\u9fa5]+/;
 
@@ -29,9 +27,9 @@ export const collectTranslateFiles = (pattern: string, options: IOptions): Promi
       }
       const collectedFiles = files.map((filePath: string) => {
         if(!path.isAbsolute(filePath)) {
-          return path.resolve(filePath);
+          return normalizePath(path.resolve(filePath));
         }
-        return filePath;
+        return normalizePath(filePath);
       })
       resolve(collectedFiles)
     })
@@ -55,11 +53,11 @@ export let lanId = 99999;
 export const upDataLanId = () => lanId++;
 const defaultLanMap = new Map<string, string>();
 // 根据当前中稳JSON生成Map结构
-export const genLanMap= (lanData: ILanJSON) => {
+export const genLanMap= (lanData: ILanJSON, forceUpdate: boolean) => {
   const { translation } = lanData;
   let lastID = Object.keys(translation).pop();
-  // 当前还没有多语言
-  if(!lastID) {
+  // 当前还没有多语言或者要强制更新语言文件
+  if(forceUpdate || !lastID) {
     return {
       lanMap: defaultLanMap
     }
@@ -81,4 +79,55 @@ export const writeJSONFile = async (path: string, data: any, options?: WriteOpti
     options = { spaces: '\t' }
   }
   await fse.outputJson(path, data, options)
+}
+
+type ITask = (...args: any) => Promise<any>;
+// 并发执行异步任务
+export const parallelCallFn = (tasks: Array<ITask>, maxCallNum: number) => {
+  return new Promise(resolve => {
+    const queue: Array<Function> = [];
+    const resolved: any = [],
+      rejected: any = []
+    let idx = 0;
+    let finishedIdx = 0;
+    const next = (task: ITask) => {
+      idx++;
+      task()
+        .then((value: any) => {
+          resolved.push({ status: 'resolved', value })
+        })
+        .catch((reason: any) => {
+          rejected.push({ status: 'resolved', reason })
+        })
+        .finally(() => {
+          if(finishedIdx++ === tasks.length - 1) {
+            resolve({ resolved, rejected });
+            return;
+          }
+          idx--;
+          const fn = queue.shift();
+          if(!!fn) {
+            fn();
+          }
+        })
+    }
+    tasks.forEach((task) => {
+      if(idx > maxCallNum) {
+        queue.push(() => next(task));
+        return;
+      }
+      next(task);
+    })
+  })
+};
+// 格式化路径
+export const normalizePath = (path: string) => {
+  return path.replace(/\\/g, '/')
+}
+
+//获取文件名
+
+export const getFileName = (name: string) => {
+  const basename = path.basename(name);
+  return basename.substring(0, basename.lastIndexOf('.'));
 }

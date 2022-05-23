@@ -19,10 +19,13 @@ export const skipCurrentStep = (node: any) => {
 }
 
 // 生成翻译语句
-export const makeTranslateStatament = (t: any, key: string, cnText: string, importedName: string) => {
+interface ITranslateFn {
+  ({t, key, cnText, importedName } : { t: any, key: string, cnText: string, importedName: string }): any;
+}
+export const makeTranslateStatament: ITranslateFn = ({ t, key, cnText, importedName }) => {
   const finialKey = Object.assign(t.stringLiteral(key), {
     trailingComments: [
-      {type: 'CommentBlock', value: cnText }
+      { type: 'CommentBlock', value: cnText }
     ]
   })
   return t.callExpression(

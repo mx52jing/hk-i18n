@@ -5,5 +5,6 @@
   ],
   "localesDir": "./locales",
   "cnJsonFileName": "zh-cn.json",
-  "translateLan": ["zh-TW"]
+  "translateLan": ["zh-TW"],
+  "excelDir": "./excel"
 }
