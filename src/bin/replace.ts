@@ -4,7 +4,9 @@ import ora from 'ora';
 import fse from 'fs-extra';
 import chalk from 'chalk';
 import prettier from 'prettier'
-import { transformFileAsync } from '@babel/core';
+import traverse from '@babel/traverse';
+import generate from '@babel/generator';
+import { parse } from '@babel/parser'
 import babelPluginReplace from '../plugins/babel-plugin-replace';
 import { getConfig } from "../utils/config";
 import { judgeChinese, collectTranslateFiles, genLanMap, normalizePath } from '../utils/tool';
@@ -37,22 +39,18 @@ const spinner = ora();
   const jsonData: ILanJSON = await fse.readJSON(cnJsonPath);
   // 通过中问JSON生成Map => { 中文: "该中文的key" }
   const { lanMap } = genLanMap(jsonData, false);
-  const transformOptions = {
-    presets: [
-      ["@babel/preset-typescript", { onlyRemoveTypeImports: true }]
-    ],
-    plugins: [
-      [babelPluginReplace, { lanMap, libName: 'i18next' }]
-    ]
-  }
   const len = allFiles.length;
   let idx = 1;
   allFiles.forEach(async (file: string) => {
     const code = await fse.readFile(file, { encoding: 'utf-8' });
     if (!judgeChinese(code)) return;
-    const res = await transformFileAsync(file, transformOptions);
-    if(!res?.code) return;
-    const formatCode = prettier.format(res.code, { parser: 'babel' })
+    const ast = parse(code, {
+      sourceType: "module",
+      plugins: ["jsx", "typescript"]
+    });
+    traverse(ast, babelPluginReplace({ lanMap, libName: 'i18next' }));
+    const { code: newCode } = generate(ast);
+    const formatCode = prettier.format(newCode, { parser: 'babel' })
     await fse.outputFile(file, formatCode)
     spinner.succeed(`[${chalk.green(file)}]`);
     if(idx++ === len) {

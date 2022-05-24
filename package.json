@@ -8,8 +8,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@babel/core": "^7.18.0",
-    "@babel/preset-typescript": "^7.17.12",
+    "@babel/generator": "^7.18.0",
+    "@babel/parser": "^7.18.0",
+    "@babel/traverse": "^7.18.0",
+    "@babel/types": "^7.18.0",
     "@vitalets/google-translate-api": "^8.0.0",
     "chalk": "^4.1.2",
     "commander": "^9.2.0",
@@ -20,7 +22,8 @@
     "prettier": "2.6.2"
   },
   "devDependencies": {
-    "@types/babel__core": "^7.1.19",
+    "@types/babel__generator": "^7.6.4",
+    "@types/babel__traverse": "^7.17.1",
     "@types/fs-extra": "^9.0.13",
     "@types/glob": "^7.2.0",
     "@types/prettier": "^2.6.1",

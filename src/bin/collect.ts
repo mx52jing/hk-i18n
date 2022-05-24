@@ -3,7 +3,8 @@ import path from 'node:path';
 import ora from 'ora';
 import fse from 'fs-extra';
 import chalk from 'chalk';
-import { transformFileAsync } from '@babel/core';
+import traverse from '@babel/traverse';
+import { parse } from '@babel/parser'
 import babelPluginCollect from '../plugins/babel-plugin-collect';
 import { getConfig } from "../utils/config";
 import {
@@ -11,7 +12,8 @@ import {
   defaultLanJSONData,
   genLanMap,
   writeJSONFile,
-  normalizePath
+  normalizePath,
+  judgeChinese
 } from '../utils/tool';
 import { parallelTranslate } from '../utils/translateUtil';
 
@@ -114,15 +116,15 @@ const collect = async ({ forceUpdate }: IOpts) => {
   // 通过中问JSON生成Map => { 中文: "该中文的key" }
   const { lanMap } = genLanMap(jsonData, forceUpdate);
   spinner.start('开始收集中文');
-  const transformOptions = {
-    presets: [["@babel/preset-typescript", { onlyRemoveTypeImports: true }]],
-    plugins: [
-      [babelPluginCollect, { lanMap }]
-    ]
-  }
   // 收集文件中所有的中文，存入lanMap中
   for (const file of allFiles) {
-    await transformFileAsync(file, transformOptions);
+    const code = await fse.readFile(file, { encoding: 'utf-8' });
+    if (!judgeChinese(code)) continue;
+    const ast = parse(code, {
+      sourceType: "module",
+      plugins: ["jsx", "typescript"]
+    });
+    traverse(ast, babelPluginCollect(lanMap));
   }
   spinner.succeed('中文收集完毕，开始生成JSON');
   // 生成中文JSON，并写入该文件

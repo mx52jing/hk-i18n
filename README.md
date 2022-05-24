@@ -32,7 +32,7 @@ npx hk-i18n init
     { "ignore": ["**/node_modules/**"] }
   ],
   "localesDir": "./locales",
-  "cnJsonFileName": "zh-cn.json",
+  "cnJsonFileName": "zh-CN.json",
   "translateLan": ["zh-TW"],
   "excelDir": "./excel"
 }
@@ -64,11 +64,13 @@ npx hk-i18n collect
 
 - 如果收集过后在代码中添加没有新的中文时，默认不会去重新生成JSON文件，如果想重新生成，添加`-f`参数，会生成新的语言文件和对应的其他语言文件。
 
+⚠️注意：谨慎使用该参数，因为生成的JSON的`key`是自增的数字，如果代码中中文已经被替换为`i18next.t('key')`的模式，使用`-f`参数可能使新生成的JSON文件的key和原来的key不一样
+
 ```bash
 npx hk-i18n collect -f
 ```
 
-如果不想对某一段文字进行翻译，可以添加魔法注释`/*i18n-disabled*/`
+如果不想对某一段文字翻译，可以添加魔法注释`/*i18n-disable*/中文`，在收集中文时会忽略这个中文
 
 
 
@@ -85,4 +87,5 @@ npx hk-i18n replace
 ```bash
 hk-i18n buildExcel
 ```
-生成的`excle`默认名称为`lan.excel`,可以通过`-n`修改生产的`excel`文件名
+- 生成的`excle`默认名称为`lan.excel`,可以通过`-n`修改生成的`excel`文件名
+- 生成的`excle`默认`sheet`名称为`lan`,可以通过`-s`修改生成的`sheet`名称

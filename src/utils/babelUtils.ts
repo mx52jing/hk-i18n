@@ -1,10 +1,10 @@
 import { judgeChinese } from "./tool";
 // 是否当前节点禁用翻译
 export const isDisabledI18n = (node: any) => {
-  const { trailingComments } = node;
-  if (!Array.isArray(trailingComments) || !trailingComments.length) return false;
-  const obj = trailingComments.find(item => {
-    return item.type === 'CommentBlock' && item.value.replace(/(\s|\n|\t)/g, '') === 'i18n-disabled'
+  const { leadingComments } = node;
+  if (!Array.isArray(leadingComments) || !leadingComments.length) return false;
+  const obj = leadingComments.find(item => {
+    return item.type === 'CommentBlock' && item.value.replace(/(\s|\n|\t)/g, '') === 'i18n-disable'
   });
   return !!obj;
 }
