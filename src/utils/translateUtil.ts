@@ -36,20 +36,24 @@ export const CN_MAX_LEN = 5000;
 export const MAX_TRAN_LAN = 50;
 // 并行翻译所有中文，最多同时翻译MAX_TRAN_LAN个
 export const parallelTranslate = async (curLanData: ILanJSON, newTranObj: Record<string, string>, keys: Array<string>, lan: string) => {
-  const tasks = keys.map(key => {
-    return () => new Promise((resolve, reject) => {
-      const val = newTranObj[key];
-      if (val?.length > CN_MAX_LEN) {
-        spinner.warn(`序号[${chalk.yellow(key)}]的文字长度过长，将跳过翻译，最大可翻译长度为[${chalk.yellow(CN_MAX_LEN)}]`);
-        curLanData.translation[key] = val;
-        resolve(key);
-        return;
-      }
-      translateText(val, lan).then(text => {
-        curLanData.translation[key] = text;
-        resolve(key);
+  try {
+    const tasks = keys.map(key => {
+      return () => new Promise((resolve, reject) => {
+        const val = newTranObj[key];
+        if (val?.length > CN_MAX_LEN) {
+          spinner.warn(`序号[${chalk.yellow(key)}]的文字长度过长，将跳过翻译，最大可翻译长度为[${chalk.yellow(CN_MAX_LEN)}]`);
+          curLanData.translation[key] = val;
+          resolve(key);
+          return;
+        }
+        translateText(val, lan).then(text => {
+          curLanData.translation[key] = text;
+          resolve(key);
+        })
       })
-    })
-  });
-  await parallelCallFn(tasks, MAX_TRAN_LAN)
+    });
+    await parallelCallFn(tasks, MAX_TRAN_LAN);
+  } catch (error) {
+   spinner.fail(chalk.red(`翻译接口报错=>${error}`)) 
+  }
 }

@@ -4,14 +4,14 @@ import {
   lanId,
   upDataLanId,
 } from '../utils/tool';
-import { skipCurrentStep, isDisabledI18n } from '../utils/babelUtils';
+import { skipCurrentStep, isDisabledI18n, isConsoleChinese } from '../utils/babelUtils';
 
 const babelPluginCollect = (lanMap: Map<string, number|string>) => {
   return {
     'StringLiteral|JSXText'(path: any) {
       const { node } = path;
       const { value } = node;
-      if (skipCurrentStep(node)) {
+      if (skipCurrentStep(path)) {
         path.skip();
         return;
       }
@@ -23,6 +23,10 @@ const babelPluginCollect = (lanMap: Map<string, number|string>) => {
       }
     },
     TemplateLiteral(path: any) {
+      if(isConsoleChinese(path)) {
+        path.skip();
+        return;
+      }
       // 收集模版字符串中的中文
       const { node } = path;
       if (isDisabledI18n(node)) {

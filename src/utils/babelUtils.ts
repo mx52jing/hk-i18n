@@ -1,3 +1,4 @@
+import * as t from '@babel/types';
 import { judgeChinese } from "./tool";
 // 是否当前节点禁用翻译
 export const isDisabledI18n = (node: any) => {
@@ -8,11 +9,32 @@ export const isDisabledI18n = (node: any) => {
   });
   return !!obj;
 }
+// 跳过console中的中文
+export const isConsoleChinese = (path: any): Boolean => {
+  const parentNode = path.parent;
+  if(
+    !!parentNode &&
+    t.isCallExpression(parentNode) &&
+    t.isMemberExpression(parentNode.callee) &&
+    t.isIdentifier(parentNode.callee.object) &&
+    parentNode.callee.object.name === 'console'
+  ) {
+    // console打印的中文不搜集
+    return true;
+  }
+  return false;
+}
+// 当前是ts声明的 例如 type IName = '哈哈' | '嘿嘿'
+export const isTsType = (path: any) => {
+  const { node } = path;
+  return t.isTSLiteralType(path.parent);
+}
 // 跳过当前节点
-export const skipCurrentStep = (node: any) => {
+export const skipCurrentStep = (path: any) => {
+  const { node } = path;
   const { value } = node;
-  // 禁用翻译或者文案中不包含中文，就跳过
-  if (isDisabledI18n(node) || !judgeChinese(value)) {
+  // 禁用翻译或者文案中不包含中文或者console中的中文，就跳过
+  if (isDisabledI18n(node) || !judgeChinese(value) || isConsoleChinese(path) || isTsType(path)) {
     return true;
   };
   return false;
@@ -35,4 +57,4 @@ export const makeTranslateStatament: ITranslateFn = ({ t, key, cnText, importedN
     ),
     [finialKey]
   )
-}
+};

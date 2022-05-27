@@ -1,6 +1,6 @@
 import * as t from '@babel/types';
 import { judgeChinese, removeTextSpace } from '../utils/tool';
-import { skipCurrentStep, makeTranslateStatament } from '../utils/babelUtils';
+import { skipCurrentStep, makeTranslateStatament, isConsoleChinese } from '../utils/babelUtils';
 
 const importDeclarationVistor = {
   ImportDeclaration(path: any) {
@@ -56,7 +56,7 @@ const babelPluginReplace = ({ lanMap, libName }: IFnArgs) => {
     StringLiteral(path: any) {
       const { node } = path;
       const { value } = node;
-      if (skipCurrentStep(node)) {
+      if (skipCurrentStep(path)) {
         path.skip();
         return;
       }
@@ -89,7 +89,7 @@ const babelPluginReplace = ({ lanMap, libName }: IFnArgs) => {
     JSXText(path: any) {
       const { node } = path;
       const { value } = node;
-      if (skipCurrentStep(node)) {
+      if (skipCurrentStep(path)) {
         path.skip();
         return;
       }
@@ -106,6 +106,10 @@ const babelPluginReplace = ({ lanMap, libName }: IFnArgs) => {
       path.skip();
     },
     TemplateLiteral(path: any) {
+      if(isConsoleChinese(path)) {
+        path.skip();
+        return;
+      }
       const { node } = path;
       const { quasis, expressions } = node;
       if (quasis.every((q: any) => !judgeChinese(q.value.raw))) {

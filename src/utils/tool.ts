@@ -130,3 +130,7 @@ export const getFileName = (name: string) => {
   const basename = path.basename(name);
   return basename.substring(0, basename.lastIndexOf('.'));
 }
+
+// 是ts/tsx文件
+const tsReg = /\.(ts|tsx)$/;
+export const isTsFile = (fileName: string) => tsReg.test(fileName);
