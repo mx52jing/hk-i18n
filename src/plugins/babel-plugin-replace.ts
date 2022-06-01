@@ -1,5 +1,5 @@
 import * as t from '@babel/types';
-import { judgeChinese, removeTextSpace } from '../utils/tool';
+import { judgeChinese, formatText } from '../utils/tool';
 import { skipCurrentStep, makeTranslateStatament, isConsoleChinese } from '../utils/babelUtils';
 
 const importDeclarationVistor = {
@@ -31,7 +31,7 @@ interface IState {
   [key: string]: any;
 }
 const babelPluginReplace = ({ lanMap, libName }: IFnArgs) => {
-  const state: IState = {}
+  const state: IState = {};
   return {
     Program: {
       enter(path: any) {
@@ -60,7 +60,7 @@ const babelPluginReplace = ({ lanMap, libName }: IFnArgs) => {
         path.skip();
         return;
       }
-      const newVal = removeTextSpace(value);
+      const newVal = formatText(value);
       const key = lanMap.get(newVal);
       if (!key) {
         path.skip();
@@ -93,7 +93,7 @@ const babelPluginReplace = ({ lanMap, libName }: IFnArgs) => {
         path.skip();
         return;
       }
-      const newVal = removeTextSpace(value);
+      const newVal = formatText(value);
       const key = lanMap.get(newVal);
       if (!key) {
         path.skip();
@@ -121,7 +121,7 @@ const babelPluginReplace = ({ lanMap, libName }: IFnArgs) => {
         if (item.type === 'TemplateElement') {
           const value = item.value.raw;
           if (!judgeChinese(value)) return;
-          const newVal = removeTextSpace(value);
+          const newVal = formatText(value);
           const key = lanMap.get(newVal);
           if (!key) return;
           expressions.splice(index + idx, 0, makeTranslateStatament({ t, key, cnText: newVal, importedName: state.importedName }));

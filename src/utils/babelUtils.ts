@@ -1,5 +1,5 @@
 import * as t from '@babel/types';
-import { judgeChinese } from "./tool";
+import { judgeChinese, removeTextSpace } from "./tool";
 // 是否当前节点禁用翻译
 export const isDisabledI18n = (node: any) => {
   const { leadingComments } = node;
@@ -47,7 +47,7 @@ interface ITranslateFn {
 export const makeTranslateStatament: ITranslateFn = ({ t, key, cnText, importedName }) => {
   const finialKey = Object.assign(t.stringLiteral(key), {
     trailingComments: [
-      { type: 'CommentBlock', value: cnText }
+      { type: 'CommentBlock', value: removeTextSpace(cnText) }
     ]
   })
   return t.callExpression(

@@ -1,6 +1,7 @@
 import {
   judgeChinese,
   removeTextSpace,
+  formatText,
   lanId,
   upDataLanId,
 } from '../utils/tool';
@@ -15,7 +16,7 @@ const babelPluginCollect = (lanMap: Map<string, number|string>) => {
         path.skip();
         return;
       }
-      const newVal = removeTextSpace(value)
+      const newVal = formatText(value)
       if (!lanMap.get(newVal)) {
         upDataLanId();
         lanMap.set(newVal, lanId);
@@ -39,7 +40,7 @@ const babelPluginCollect = (lanMap: Map<string, number|string>) => {
         if (!judgeChinese(val)) {
           return memo;
         }
-        const newVal = removeTextSpace(val);
+        const newVal = formatText(val);
         memo.push(newVal);
         return memo;
       }, [])

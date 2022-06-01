@@ -13,7 +13,8 @@ import {
   genLanMap,
   writeJSONFile,
   normalizePath,
-  judgeChinese
+  judgeChinese,
+  formatLineSymbol
 } from '../utils/tool';
 import { parallelTranslate } from '../utils/translateUtil';
 
@@ -30,7 +31,7 @@ const genCNJson = async (lanMap: Map<string, string>, jsonData: ILanJSON, cnJson
   lanMap.forEach((value, key) => {
     const val = jsonData.translation[value];
     if (!val) {
-      jsonData.translation[value] = key;
+      jsonData.translation[value] = formatLineSymbol(key);
     }
   });
   await writeJSONFile(cnJsonPath, jsonData);

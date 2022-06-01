@@ -134,3 +134,24 @@ export const getFileName = (name: string) => {
 // 是ts/tsx文件
 const tsReg = /\.(ts|tsx)$/;
 export const isTsFile = (fileName: string) => tsReg.test(fileName);
+
+// 移除文字前后空格
+export const textTrim = (text: string) => {
+  if(!text) return "";
+  return text.trim();
+}
+
+// 格式化换行等符号
+const lineSymbolReg = /(\\n)|(\\r\\n)|(\\n\\r)|(\\r)/g;
+export const formatLineSymbol = (text: string) => {
+  if(!text) return "";
+  return text.replace(lineSymbolReg, "\n")
+}
+
+export const compose = (...fns: Array<Function>) => {
+  if(!fns.length) return <T>(arg: T) => arg;
+  if(fns.length === 1) return fns[0];
+  return fns.reduce((a, b) => (...args: any[]) => a(b(...args)));
+}
+// 格式化文案 去除前后空格 和格式化换行
+export const formatText = compose(formatLineSymbol, textTrim)
