@@ -4,7 +4,7 @@
     { "ignore": ["**/node_modules/**"] }
   ],
   "localesDir": "./locales",
-  "cnJsonFileName": "zh-cn.json",
+  "cnJsonFileName": "zh-CN.json",
   "translateLan": ["zh-TW"],
   "excelDir": "./excel"
 }
