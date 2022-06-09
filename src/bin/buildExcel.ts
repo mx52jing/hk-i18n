@@ -4,20 +4,14 @@ import fse from 'fs-extra';
 import xlsx from 'node-xlsx';
 import ora from 'ora';
 import chalk from 'chalk';
+import Inquirer from 'inquirer';
 import { getConfig } from '../utils/config';
 import { normalizePath, getFileName } from '../utils/tool';
 import type { ILanJSON } from '../utils/tool';
+import { genExcelQuestions } from '../utils/questions';
 
-interface IProps {
-  fileName: string;
-  sheetName: string;
-}
 const spinner = ora();
-const buildExcel = async ({ fileName, sheetName }: IProps) => {
-  if (!fileName) {
-    spinner.fail(chalk.red('Error：请指定生产的excel文件名称'))
-    process.exit(2);
-  }
+(async () => {
   const {
     localesDir,
     cnJsonFileName,
@@ -38,11 +32,18 @@ const buildExcel = async ({ fileName, sheetName }: IProps) => {
     spinner.fail(chalk.red('未找到语言文件，请先生成语言文件'));
     process.exit();
   }
+  const { fileName, sheetName } = await Inquirer.prompt(genExcelQuestions)
+  if (!fileName) {
+    spinner.fail(chalk.red('Error：请指定生产的excel文件名称'))
+    process.exit(2);
+  }
   const otherLan = allLanJson.filter(key => key !== cnJsonFileName);
-  const titleArr = otherLan.map(item => getFileName(item))
+  const titleArr = otherLan.map(item => getFileName(item));
+  // 先设置excel头部
   const data = [
     ["key", getFileName(cnJsonFileName), ...titleArr]
   ];
+  // 获取中文JSON路径 并且读取JSON文件的内容
   const cnJsonPath = normalizePath(path.resolve(localesDir, cnJsonFileName));
   const cnJsonData: ILanJSON = await fse.readJSON(cnJsonPath);
   const { translation } = cnJsonData;
@@ -50,6 +51,7 @@ const buildExcel = async ({ fileName, sheetName }: IProps) => {
     const jsonPath = normalizePath(path.resolve(localesDir, `${item}`));
     return fse.readJSON(jsonPath);
   });
+  // 获取除了中文的其他语言JSON
   const lanData: Array<ILanJSON> = await Promise.all(promises);
   for(const key in translation) {
     if(translation.hasOwnProperty(key)) {
@@ -71,10 +73,8 @@ const buildExcel = async ({ fileName, sheetName }: IProps) => {
       })
     })
   }
-  const excelPath = normalizePath(path.resolve(excelDir, `${fileName}`))
+  const excelPath = normalizePath(path.resolve(excelDir, `${fileName}.xlsx`))
   const buffer = xlsx.build([{ name: sheetName, data, options: {} }]);
   await fse.outputFile(excelPath, buffer);
   spinner.succeed(chalk.green('成功生成excel文件'))
-}
-
-export default buildExcel;
+})();

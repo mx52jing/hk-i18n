@@ -33,8 +33,14 @@ export const translateText: ITranslateFn = async (text: string, to: string) => {
 // 最长可翻译的中文
 export const CN_MAX_LEN = 5000;
 // 最多可以有多少中文同时翻译
-export const MAX_TRAN_LAN = 50;
-// 并行翻译所有中文，最多同时翻译MAX_TRAN_LAN个
+export const MAX_TRAN_LAN = 10;
+/**
+ * 并行翻译所有中文，最多同时翻译MAX_TRAN_LAN个
+ * @param curLanData 当前JSON数据
+ * @param newTranObj 中文JSON的 translation字段中的映射数据
+ * @param keys 所有要翻译的中文的key
+ * @param lan 要翻译成的语种
+ */
 export const parallelTranslate = async (curLanData: ILanJSON, newTranObj: Record<string, string>, keys: Array<string>, lan: string) => {
   try {
     const tasks = keys.map(key => {
@@ -47,6 +53,12 @@ export const parallelTranslate = async (curLanData: ILanJSON, newTranObj: Record
           return;
         }
         translateText(val, lan).then(text => {
+          if(val.startsWith('\n')) {
+            text = `\n${text}`
+          }
+          if(val.endsWith('\n')) {
+            text = `${text}\n`
+          }
           curLanData.translation[key] = text;
           resolve(key);
         })

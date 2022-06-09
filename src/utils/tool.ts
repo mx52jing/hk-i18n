@@ -22,7 +22,7 @@ export const collectTranslateFiles = (pattern: string, options: IOptions): Promi
     glob(pattern, options, (err, files) => {
       if(!!err) {
         console.log(chalk.red('Error： 匹配文件出错，请检查配置文件'));
-        resolve([])
+        resolve([]);
         process.exit(2);
       }
       const collectedFiles = files.map((filePath: string) => {
@@ -52,7 +52,7 @@ export let lanId = 99999;
 // 更新json文件的多语言key
 export const upDataLanId = () => lanId++;
 const defaultLanMap = new Map<string, string>();
-// 根据当前中稳JSON生成Map结构
+// 根据当前中文JSON生成Map结构
 export const genLanMap= (lanData: ILanJSON, forceUpdate: boolean) => {
   const { translation } = lanData;
   let lastID = Object.keys(translation).pop();
