@@ -15,12 +15,17 @@ export const translateQuestions = [
     name: 'forceUpdate',
     message: chalk.cyan('是否启用强制更新，这样会重新翻译所有的中文'),
     default: false
-  },
+  }
+]
+export const translateKeysQs = [
   {
     type: 'input',
     name: 'keys',
-    message: chalk.cyan('请输入需要翻译的中文keys'),
-    default: []
+    message: chalk.cyan('请输入需要翻译的中文keys,多个key以逗号分隔'),
+    default: '',
+    filter(val: string) {
+      return val.split(',')
+    } 
   }
 ]
 

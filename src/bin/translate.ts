@@ -7,7 +7,7 @@ import Inquirer from 'inquirer';
 import { getConfig } from "../utils/config";
 import { normalizePath, writeJSONFile, defaultLanJSONData } from '../utils/tool';
 import { parallelTranslate } from '../utils/translateUtil';
-import { translateQuestions } from '../utils/questions';
+import { translateQuestions, translateKeysQs } from '../utils/questions';
 
 import type { ILanJSON } from '../utils/tool';
 
@@ -96,10 +96,19 @@ const genTranslateJSON = async ({ cnJsonData, translateLan, localesDir, forceUpd
     spinner.warn(chalk.yellow('没有需要翻译其他语言'));
     process.exit(1);
   };
-  const { keys, forceUpdate } = await Inquirer.prompt(translateQuestions);
+  const { forceUpdate } = await Inquirer.prompt(translateQuestions);
+  let keys = [];
+  if(!forceUpdate) {
+    const { keys: tranKeys } = await Inquirer.prompt(translateKeysQs);
+    keys = tranKeys.filter(Boolean);
+  }
   if (!Array.isArray(keys)) {
-    spinner.fail(chalk.red('Error: keys格式为字符串数组'));
+    spinner.fail(chalk.red('Error: keys格式错误'));
     return;
+  }
+  if(!keys.length && !forceUpdate) {
+    spinner.warn(chalk.yellow('Warn: 没有需要翻译的key'));
+    return; 
   }
   const cnJsonData: ILanJSON = await fse.readJSON(cnJsonPath);
   // 根据中文文件生成其他语言文件

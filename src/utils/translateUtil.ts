@@ -46,6 +46,11 @@ export const parallelTranslate = async (curLanData: ILanJSON, newTranObj: Record
     const tasks = keys.map(key => {
       return () => new Promise((resolve, reject) => {
         const val = newTranObj[key];
+        if(!val) {
+          resolve(key);
+          spinner.warn(`未找到key:[${chalk.red(key)}]对应的中文`);
+          return; 
+        }
         if (val?.length > CN_MAX_LEN) {
           spinner.warn(`序号[${chalk.yellow(key)}]的文字长度过长，将跳过翻译，最大可翻译长度为[${chalk.yellow(CN_MAX_LEN)}]`);
           curLanData.translation[key] = val;
