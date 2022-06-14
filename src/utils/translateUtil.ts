@@ -7,7 +7,7 @@ import type { ILanJSON } from './tool'
 type ITranslateFn = (text: string, to: string) => Promise<string>
 const spinner = ora();
 const delay = (ms: number = 5000) => new Promise((resolve) => {
-  setTimeout(_ => resolve('timeout'), ms)
+  setTimeout(() => resolve(TRANSLATE_TIMEOUT), ms)
 })
 
 export const freeTranslate = async (text: string, to: string) => {
@@ -18,14 +18,16 @@ export const freeTranslate = async (text: string, to: string) => {
   })
 }
 
+export const TRANSLATE_TIMEOUT = '__translate_timeout__';
+export let timeoutKey = '';
 export const translateText: ITranslateFn = async (text: string, to: string) => {
   const res = await Promise.race([
     delay(),
     freeTranslate(text, to)
   ]);
-  if (res === 'timeout') {
+  if (res === TRANSLATE_TIMEOUT) {
     spinner.fail(chalk.red(`[${text}]翻译超时`));
-    return;
+    return TRANSLATE_TIMEOUT;
   }
   return res.text;
 }
@@ -49,7 +51,7 @@ export const parallelTranslate = async (curLanData: ILanJSON, newTranObj: Record
         if(!val) {
           resolve(key);
           spinner.warn(`未找到key:[${chalk.red(key)}]对应的中文`);
-          return; 
+          return;
         }
         if (val?.length > CN_MAX_LEN) {
           spinner.warn(`序号[${chalk.yellow(key)}]的文字长度过长，将跳过翻译，最大可翻译长度为[${chalk.yellow(CN_MAX_LEN)}]`);
@@ -63,6 +65,9 @@ export const parallelTranslate = async (curLanData: ILanJSON, newTranObj: Record
           }
           if(val.endsWith('\n')) {
             text = `${text}\n`
+          }
+          if(text === TRANSLATE_TIMEOUT) {
+            timeoutKey += !!timeoutKey ? `,${key}` : key
           }
           curLanData.translation[key] = text;
           resolve(key);

@@ -6,7 +6,7 @@ import ora from 'ora';
 import Inquirer from 'inquirer';
 import { getConfig } from "../utils/config";
 import { normalizePath, writeJSONFile, defaultLanJSONData } from '../utils/tool';
-import { parallelTranslate } from '../utils/translateUtil';
+import { parallelTranslate, timeoutKey } from '../utils/translateUtil';
 import { translateQuestions, translateKeysQs } from '../utils/questions';
 
 import type { ILanJSON } from '../utils/tool';
@@ -73,7 +73,6 @@ const genTranslateJSON = async ({ cnJsonData, translateLan, localesDir, forceUpd
     spinner.succeed(`[${chalk.cyan(curJsonPath)}]文件写入成功`);
     if (idx++ === len) {
       spinner.succeed(chalk.green('所有语言文件均已生成完毕，程序结束'));
-      process.exit();
     }
   })
 }
@@ -106,28 +105,10 @@ const genTranslateJSON = async ({ cnJsonData, translateLan, localesDir, forceUpd
     spinner.fail(chalk.red('Error: keys格式错误'));
     return;
   }
-  if(!keys.length && !forceUpdate) {
-    spinner.warn(chalk.yellow('Warn: 没有需要翻译的key'));
-    return; 
-  }
   const cnJsonData: ILanJSON = await fse.readJSON(cnJsonPath);
   // 根据中文文件生成其他语言文件
   await genTranslateJSON({ cnJsonData, translateLan, localesDir, forceUpdate, keys });
-  // const len = translateLan.length;
-  // let idx = 1;
-  // translateLan.forEach(async lan => {
-  //   if (!lan) {
-  //     spinner.fail(`Error: 当前语种[${lan}]不合法`);
-  //     return;
-  //   }
-  //   // 当前语言的JSON路径
-  //   const curJsonPath = normalizePath(path.resolve(localesDir, `${lan}.json`));
-  //   const curLanData: ILanJSON = await fse.readJSON(curJsonPath);
-  //   await parallelTranslate(curLanData, cnTranObj, keys, lan);
-  //   await writeJSONFile(curJsonPath, curLanData);
-  //   if (idx++ === len) {
-  //     spinner.succeed(chalk.green('翻译完毕'));
-  //     process.exit();
-  //   }
-  // })
+  if(!!timeoutKey) {
+    spinner.info(`翻译超时的key为${timeoutKey}`)
+  }
 })();
