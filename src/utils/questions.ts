@@ -1,4 +1,5 @@
 import chalk from "chalk";
+import { MAX_TRAN_LAN } from "./translateUtil";
 // 收集的选项
 export const collectQuestions = [
   {
@@ -15,6 +16,12 @@ export const translateQuestions = [
     name: 'forceUpdate',
     message: chalk.cyan('是否启用强制更新，这样会重新翻译所有的中文'),
     default: false
+  },
+  {
+    type: 'number',
+    name: 'maxTranslateNum',
+    message: chalk.cyan('最多同时翻译多少中文，网速不好的建议(10)个，不然容易超时'),
+    default: MAX_TRAN_LAN
   }
 ]
 export const translateKeysQs = [

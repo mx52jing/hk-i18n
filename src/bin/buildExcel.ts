@@ -37,7 +37,7 @@ const spinner = ora();
     spinner.fail(chalk.red('Error：请指定生产的excel文件名称'))
     process.exit(2);
   }
-  const otherLan = allLanJson.filter(key => key !== cnJsonFileName);
+  const otherLan = allLanJson.filter(key => key.toLocaleLowerCase() !== cnJsonFileName.toLocaleLowerCase());
   const titleArr = otherLan.map(item => getFileName(item));
   // 先设置excel头部
   const data = [

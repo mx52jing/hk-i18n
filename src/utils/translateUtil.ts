@@ -27,7 +27,7 @@ export const translateText: ITranslateFn = async (text: string, to: string) => {
   ]);
   if (res === TRANSLATE_TIMEOUT) {
     spinner.fail(chalk.red(`[${text}]翻译超时`));
-    return TRANSLATE_TIMEOUT;
+    return;
   }
   return res.text;
 }
@@ -37,13 +37,14 @@ export const CN_MAX_LEN = 5000;
 // 最多可以有多少中文同时翻译
 export const MAX_TRAN_LAN = 10;
 /**
- * 并行翻译所有中文，最多同时翻译MAX_TRAN_LAN个
+ * 并行翻译所有中文，默认最多同时翻译MAX_TRAN_LAN个
  * @param curLanData 当前JSON数据
  * @param newTranObj 中文JSON的 translation字段中的映射数据
  * @param keys 所有要翻译的中文的key
  * @param lan 要翻译成的语种
+ * @param maxTranslateNum 最多同时翻译多少中文
  */
-export const parallelTranslate = async (curLanData: ILanJSON, newTranObj: Record<string, string>, keys: Array<string>, lan: string) => {
+export const parallelTranslate = async (curLanData: ILanJSON, newTranObj: Record<string, string>, keys: Array<string>, lan: string, maxTranslateNum: number) => {
   try {
     const tasks = keys.map(key => {
       return () => new Promise((resolve, reject) => {
@@ -66,15 +67,15 @@ export const parallelTranslate = async (curLanData: ILanJSON, newTranObj: Record
           if(val.endsWith('\n')) {
             text = `${text}\n`
           }
-          if(text === TRANSLATE_TIMEOUT) {
-            timeoutKey += !!timeoutKey ? `,${key}` : key
+          if(!text) {
+            timeoutKey += !!timeoutKey ? `,${key}` : key;
           }
           curLanData.translation[key] = text;
           resolve(key);
         })
       })
     });
-    await parallelCallFn(tasks, MAX_TRAN_LAN);
+    await parallelCallFn(tasks, maxTranslateNum);
   } catch (error) {
    spinner.fail(chalk.red(`翻译接口报错=>${error}`)) 
   }
