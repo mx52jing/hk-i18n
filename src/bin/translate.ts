@@ -71,7 +71,7 @@ const genTranslateJSON = ({ cnJsonData, translateLan, localesDir, forceUpdate, k
         spinner.warn(`[${chalk.yellow(`${lan}.json`)}]未更新`);
         return;
       }
-      spinner.start(`开始翻译中文为[${chalk.cyan(lan)}]，这可能需要一段时间`);
+      spinner.start(`开始翻译[${chalk.cyan('中文')}]为[${chalk.cyan(lan)}]，这可能需要一段时间`);
       await parallelTranslate(curLanData, newTranObj, allKeys, lan, maxTranslateNum);
       await writeJSONFile(curJsonPath, curLanData);
       spinner.succeed(`[${chalk.cyan(curJsonPath)}]文件写入成功`);

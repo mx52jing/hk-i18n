@@ -128,12 +128,10 @@ const babelPluginReplace = ({ lanMap, libName }: IFnArgs) => {
           idx++;
           // 每增添一个表达式都需要变化原始节点,并新增下一个字符节点
           item.value = { raw: '', cooked: '' };
+          quasis.splice(index + 1, 0, t.templateElement({ raw: '', cooked: '' }, false))
         }
       });
-      while (idx--) {
-        // 每增添一个表达式都需要变化原始节点,并新增下一个字符节点
-        quasis.push(t.templateElement({ raw: '', cooked: '' }, idx === 1 ? true : false));
-      }
+      quasis[quasis.length - 1].tail = true;
       path.skip();
     }
   }

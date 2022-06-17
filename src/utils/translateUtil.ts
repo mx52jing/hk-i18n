@@ -49,7 +49,7 @@ export const parallelTranslate = async (curLanData: ILanJSON, newTranObj: Record
     const tasks = keys.map(key => {
       return () => new Promise((resolve, reject) => {
         const val = newTranObj[key];
-        if(!val) {
+        if (!val) {
           resolve(key);
           spinner.warn(`未找到key:[${chalk.red(key)}]对应的中文`);
           return;
@@ -60,23 +60,30 @@ export const parallelTranslate = async (curLanData: ILanJSON, newTranObj: Record
           resolve(key);
           return;
         }
-        translateText(val, lan).then(text => {
-          if(val.startsWith('\n')) {
-            text = `\n${text}`
-          }
-          if(val.endsWith('\n')) {
-            text = `${text}\n`
-          }
-          if(!text) {
-            timeoutKey += !!timeoutKey ? `,${key}` : key;
-          }
-          curLanData.translation[key] = text;
-          resolve(key);
-        })
+        translateText(val, lan)
+          .then(text => {
+            if (val.startsWith('\n')) {
+              text = `\n${text}`
+            }
+            if (val.endsWith('\n')) {
+              text = `${text}\n`
+            }
+            if (!text) {
+              timeoutKey += !!timeoutKey ? `,${key}` : key;
+            }
+            curLanData.translation[key] = text;
+            resolve(key);
+          })
+          .catch(err => {
+            if(err?.statusCode === 302) {
+              console.log(chalk.red('\nError：今日翻译次数达到上限，明天再试试吧'));
+              process.exit();
+            }
+          })
       })
     });
     await parallelCallFn(tasks, maxTranslateNum);
   } catch (error) {
-   spinner.fail(chalk.red(`翻译接口报错=>${error}`)) 
+    spinner.fail(chalk.red(`翻译接口报错=>${error}`))
   }
 }

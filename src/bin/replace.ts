@@ -53,7 +53,13 @@ const spinner = ora();
     allFiles.forEach(async (file: string) => {
       try {
         const code = await fse.readFile(file, { encoding: 'utf-8' });
-        if (!chineseReg.test(code)) return;
+        if (!chineseReg.test(code)) {
+          if (idx++ === len) {
+            spinner.succeed(chalk.green('所有文件中文均已替换完毕，程序结束'));
+            process.exit();
+          }
+          return;
+        };
         const ast = parse(code, {
           sourceType: "module",
           plugins: ["jsx", "typescript"]

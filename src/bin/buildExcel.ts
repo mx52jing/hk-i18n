@@ -53,6 +53,7 @@ const spinner = ora();
   });
   // 获取除了中文的其他语言JSON
   const lanData: Array<ILanJSON> = await Promise.all(promises);
+  // 先生成中文的数据
   for(const key in translation) {
     if(translation.hasOwnProperty(key)) {
       data.push(
@@ -60,16 +61,19 @@ const spinner = ora();
       )
     }
   }
+  // 根据中文JSON，组装其他语言的数据
   if(!!lanData.length) {
     lanData.forEach(d => {
-      const { translation } = d;
+      const { translation: curTranslation } = d;
       const allKeys = Object.keys(translation);
       allKeys.forEach((key, index) => {
         const idx = index + 1;
-        const val = translation[key]
-        if(data[idx]?.[0] === key) {
-          data[idx].push(val)
+        const val = curTranslation[key];
+        if(!val) {
+          spinner.warn(chalk.red(`[${key}]对应的翻译有缺失`));
+          return;
         }
+        data[idx].push(val);
       })
     })
   }
